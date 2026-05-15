@@ -1,0 +1,568 @@
+{
+  "info": {
+    "_postman_id": "3c9e9325-d2c2-489c-866a-ec62bcf2a071",
+    "name": "Ostad Assignment 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44912908"
+  },
+  "item": [
+    {
+      "name": "Login with registered credentials",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test(\"Response has token\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"token\");",
+              "    pm.expect(jsonData.token).to.be.a(\"string\").and.not.empty;",
+              "});",
+              "",
+              "pm.collectionVariables.set(\"authToken\", jsonData.token);",
+              "pm.collectionVariables.set(\"validLoginEmail\", pm.variables.get(\"loginEmail\"));",
+              "pm.collectionVariables.set(\"validLoginPassword\", pm.variables.get(\"loginPassword\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"{{loginPassword}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        },
+        "description": "Q3: Login with registered credentials and capture authToken for reuse."
+      },
+      "response": []
+    },
+    {
+      "name": "GET user by userId",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "const expectedUserId = String(pm.variables.get(\"userId\"));",
+              "const expectedFirstName = pm.variables.get(\"expectedFirstName\");",
+              "const expectedLastName = pm.variables.get(\"expectedLastName\");",
+              "const expectedEmail = pm.variables.get(\"expectedEmail\");",
+              "",
+              "pm.test(\"data.id equals userId\", function () {",
+              "    pm.expect(String(jsonData.data.id)).to.eql(expectedUserId);",
+              "});",
+              "",
+              "pm.test(\"data.first_name and data.last_name match expected names\", function () {",
+              "    pm.expect(jsonData.data.first_name).to.eql(expectedFirstName);",
+              "    pm.expect(jsonData.data.last_name).to.eql(expectedLastName);",
+              "});",
+              "",
+              "pm.test(\"data.email matches expected email\", function () {",
+              "    pm.expect(jsonData.data.email).to.eql(expectedEmail);",
+              "});",
+              "",
+              "pm.collectionVariables.set(\"fetchedUserId\", String(jsonData.data.id));",
+              "pm.collectionVariables.set(\"fetchedFirstName\", jsonData.data.first_name);",
+              "pm.collectionVariables.set(\"fetchedLastName\", jsonData.data.last_name);",
+              "pm.collectionVariables.set(\"fetchedEmail\", jsonData.data.email);",
+              "pm.collectionVariables.set(\"fetchedAvatar\", jsonData.data.avatar || \"\");"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}"
+          ]
+        },
+        "description": "Q4: Get user by userId and verify returned user fields match expected values."
+      },
+      "response": []
+    },
+    {
+      "name": "PUT Updated profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "const expectedName = pm.variables.get(\"putName\");",
+              "const expectedJob = pm.variables.get(\"putJob\");",
+              "",
+              "pm.test(\"response name/job echo request\", function () {",
+              "    pm.expect(jsonData.name).to.eql(expectedName);",
+              "    pm.expect(jsonData.job).to.eql(expectedJob);",
+              "});",
+              "",
+              "pm.test(\"updatedAt exists and is valid ISO timestamp\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"updatedAt\");",
+              "    pm.expect(new Date(jsonData.updatedAt).toISOString()).to.eql(jsonData.updatedAt);",
+              "});",
+              "",
+              "pm.collectionVariables.set(\"lastPutName\", jsonData.name);",
+              "pm.collectionVariables.set(\"lastPutJob\", jsonData.job);",
+              "pm.collectionVariables.set(\"lastPutUpdatedAt\", jsonData.updatedAt);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"{{putName}}\",\"job\":\"{{putJob}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}"
+          ]
+        },
+        "description": "Q5: Update the full profile and verify echo fields and updatedAt timestamp."
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH single field",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"job\":\"{{patchJob}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}"
+          ]
+        },
+        "description": "Q6: Patch one field and verify only the patched field is present with updatedAt."
+      },
+      "response": []
+    },
+    {
+      "name": "NEGATIVE - Login missing password",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test(\"response has non-empty error message\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.be.a(\"string\").and.not.empty;",
+              "});",
+              "",
+              "pm.test(\"error message mentions password\", function () {",
+              "    pm.expect(jsonData.error.toLowerCase()).to.include(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{loginEmail}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        },
+        "description": "Q8 negative case: login request using stored email but omitting password. Expects a 400 error response from ReqRes."
+      },
+      "response": []
+    },
+    {
+      "name": "NEGATIVE - Login missing email",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test(\"response has non-empty error message\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.be.a(\"string\").and.not.empty;",
+              "});",
+              "",
+              "pm.test(\"error message mentions email\", function () {",
+              "    pm.expect(jsonData.error.toLowerCase()).to.include(\"email\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"password\":\"{{loginPassword}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        },
+        "description": "Q8 negative case: login request using stored password but omitting email. Expects a 400 error response from ReqRes."
+      },
+      "response": []
+    },
+    {
+      "name": "NEGATIVE - GET nonexistent user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"response body is empty object or empty body\", function () {",
+              "    const text = pm.response.text().trim();",
+              "    if (text.length === 0) {",
+              "        pm.expect(text).to.eql(\"\");",
+              "    } else {",
+              "        const jsonData = pm.response.json();",
+              "        pm.expect(jsonData).to.be.an(\"object\");",
+              "        pm.expect(Object.keys(jsonData).length).to.eql(0);",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/23",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "23"
+          ]
+        },
+        "description": "Q8 negative case: fetch a user route that ReqRes returns as not found. Uses the same stored baseUrl/apiKey setup and asserts 404 behavior."
+      },
+      "response": []
+    },
+    {
+      "name": "NEGATIVE - Register missing password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{loginEmail}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "description": "Q8 negative case: register using stored email but omitting password so the API returns a 400 validation error."
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": []
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "createdUserId",
+      "value": ""
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    },
+    {
+      "key": "expectedFirstName",
+      "value": ""
+    },
+    {
+      "key": "expectedLastName",
+      "value": ""
+    },
+    {
+      "key": "expectedEmail",
+      "value": ""
+    },
+    {
+      "key": "loginEmail",
+      "value": ""
+    },
+    {
+      "key": "loginPassword",
+      "value": ""
+    },
+    {
+      "key": "putName",
+      "value": ""
+    },
+    {
+      "key": "putJob",
+      "value": ""
+    },
+    {
+      "key": "patchJob",
+      "value": ""
+    },
+    {
+      "key": "validLoginEmail",
+      "value": ""
+    },
+    {
+      "key": "validLoginPassword",
+      "value": ""
+    },
+    {
+      "key": "fetchedUserId",
+      "value": ""
+    },
+    {
+      "key": "fetchedFirstName",
+      "value": ""
+    },
+    {
+      "key": "fetchedLastName",
+      "value": ""
+    },
+    {
+      "key": "fetchedEmail",
+      "value": ""
+    },
+    {
+      "key": "fetchedAvatar",
+      "value": ""
+    },
+    {
+      "key": "lastPutName",
+      "value": ""
+    },
+    {
+      "key": "lastPutJob",
+      "value": ""
+    },
+    {
+      "key": "lastPutUpdatedAt",
+      "value": ""
+    },
+    {
+      "key": "lastPatchedJob",
+      "value": ""
+    },
+    {
+      "key": "lastPatchUpdatedAt",
+      "value": ""
+    }
+  ]
+}
